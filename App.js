@@ -33,7 +33,7 @@ const getPlaylist = async (access_token, playlist_id) => {
         const playlistSize = resultPlaylist.tracks.total;
 
 
-        mkdirp(`${playlistName}`, function(err) { 
+        mkdirp(`../${playlistName}`, function(err) { 
 
             // path exists unless there was an error
             console.error('error', err);
@@ -49,7 +49,7 @@ const getPlaylist = async (access_token, playlist_id) => {
     
     
             resultTracks.items.forEach(track => {
-                download(track.track.album.images[0].url, `${playlistName}/${track.track.name}.jpg`, function(){
+                download(track.track.album.images[0].url, `../${playlistName}/${track.track.name}.jpg`, function(){
                     console.log(`${track.track.name}`);
                 });      
             });
