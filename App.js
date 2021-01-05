@@ -16,31 +16,48 @@ const getPlaylist = async (access_token, playlist_id) => {
 
         var options = {
             headers: { 'Authorization': 'Bearer ' + access_token },
-            json: true
+            json: true,
           };
 
-        const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, options);
+        const responsePlaylist = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, options);
 
-        const result = await response.json();
+        const resultPlaylist = await responsePlaylist.json();
 
-        const tracks = result.tracks;
+        if(resultPlaylist.error){
+            console.log(resultPlaylist);
+            return;
+        }
 
-        mkdirp(`${result.name}`, function(err) { 
+        const playlistName = resultPlaylist.name;
+
+        const playlistSize = resultPlaylist.tracks.total;
+
+
+        mkdirp(`${playlistName}`, function(err) { 
 
             // path exists unless there was an error
             console.error('error', err);
         
         });
 
-        tracks.items.forEach(track => {
-            // trackCover.push(track.track.album.images[0].url)
-            download(track.track.album.images[0].url, `${result.name}/${track.track.name}.jpg`, function(){
-                console.log(`${track.track.name} - done`);
-            });      
-        });
+        var offset = 0;
 
-          
-        return result;
+        while (offset <= playlistSize ) {
+            const responseTracks = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks?offset=${offset}`, options);
+
+            const resultTracks = await responseTracks.json();
+    
+    
+            resultTracks.items.forEach(track => {
+                download(track.track.album.images[0].url, `${playlistName}/${track.track.name}.jpg`, function(){
+                    console.log(`${track.track.name}`);
+                });      
+            });
+
+            offset = offset + 100;
+        }
+        
+    return null;
 
     } catch (error) {
 
@@ -50,8 +67,8 @@ const getPlaylist = async (access_token, playlist_id) => {
     }
 };
 
-var access_token = "BQDuwCaAuc3CZ1rwFHRmiSAVpQONsdDv2AUa_HnK2vfidyhBL0rG28782vQbpejJs3ugt8hIDsfHAxITHijIV59lfsIZ3ecjsyjfYTZyFNMdr2C461sZaXUoqqEdJChPfs8jz1vEmjL0QrJk3TeIqejh8wmINne0yA";
-var playlist_id = "4Tztc4rPUAen00AfpLc5sc"
+var access_token = "BQC27zgsP4zR8P1Ow0cnMoy7f8_lS5kVB2lg2MDtfkETY8AcLSMiFdZsLuKjFUnBUOu0fSLIufIb1cKT2pNbj-TBqZW_fQyKoq5NWJb5aJPhAm7G69ml_zSr-zQV1EFFDkHClJ-G2bI85usfz6f9nCBLOuYPWlGMKQ";
+var playlist_id = "2EoRtpagm7ncZQVsjKvvtc"
 
 getPlaylist(access_token, playlist_id);
 
